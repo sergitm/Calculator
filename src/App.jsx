@@ -9,13 +9,30 @@ function App() {
 
   const calculate = () => {
     if (isOperator(et.charAt(et.length - 1))) return;
-    setAnswer(eval(et).toString());
-    setExpression("");
+    const parts = et.split(" ");
+    const newParts = [];
 
-    if (isOperator(et.charAt(0))) {
-      setAnswer(eval(answer + et).toString());
-      setExpression("");
+    for (let i = parts.length -1; i >= 0; i--) {
+      if (["/", "*", "+"].includes(parts[i]) && isOperator(parts[i])) {
+        newParts.unshift(parts[i]);
+        let j = 0;
+        let k = i -1;
+        while (isOperator(parts[k])) {
+          j++;
+          k--;
+        }
+        i -= j;
+      } else {
+        newParts.unshift(parts[i]);
+      }
     }
+    const newExpression = newParts.join(" ");
+    if (isOperator(newExpression.charAt(0))) {
+      setAnswer(eval(answer + newExpression).toString());
+    } else {
+      setAnswer(eval(newExpression).toString());
+    }
+    setExpression("");
   }
 
   const isOperator = (button) => {
@@ -33,8 +50,8 @@ function App() {
     else {
       switch (button) {
         case "clear":
-          setAnswer("0");
-          setExpression("");
+          setAnswer("");
+          setExpression("0");
           break;
         case "negative":
           setAnswer((parseFloat(answer) * -1).toString());
@@ -51,7 +68,8 @@ function App() {
           break;
         case ".":
           const lastNumber = expression.split(/[-+/*]/g).pop();
-          if (lastNumber.includes(".")) return;
+          if (!lastNumber) return;
+          if (lastNumber?.includes(".")) return;
           setExpression(expression + button);
           break;
         default:
